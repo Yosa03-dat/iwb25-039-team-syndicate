@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pocket Dictionary</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+
+        .search-container {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 15px 50px 15px 20px;
+            border: 2px solid #e1e5e9;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            outline: none;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .search-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .search-btn {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 20px;
+            padding: 10px 20px;
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .search-btn:hover {
+            transform: translateY(-50%) scale(1.05);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .search-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: translateY(-50%) scale(1);
+        }
+
+        .loading {
+            text-align: center;
+            color: #667eea;
+            font-size: 1.1rem;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #667eea;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .result-container {
+            display: none;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        .result-container.show {
+            display: block;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .word-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f2f5;
+        }
+
+        .word-title {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #333;
+            text-transform: capitalize;
+        }
+
+        .pronunciation {
+            font-size: 1.2rem;
+            color: #667eea;
+            font-style: italic;
+            background: rgba(102, 126, 234, 0.1);
+            padding: 5px 15px;
+            border-radius: 15px;
+        }
+
+        .section {
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 2px;
+            margin-right: 10px;
+        }
+
+        .meanings-list {
+            list-style: none;
+        }
+
+        .meaning-item {
+            background: #f8f9fa;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s ease;
+        }
+
+        .meaning-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .synonyms-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .synonym-tag {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .synonym-tag:hover {
+            transform: scale(1.05);
+            box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
+        }
+
+        .error-message {
+            background: #fff5f5;
+            color: #e53e3e;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #e53e3e;
+            text-align: center;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .example-searches {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e1e5e9;
+        }
+
+        .example-searches p {
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .example-word {
+            display: inline-block;
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            padding: 5px 12px;
+            border-radius: 15px;
+            margin: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .example-word:hover {
+            background: #667eea;
+            color: white;
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 30px 20px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .word-header {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+            }
+
+            .search-input {
+                padding-right: 80px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📚 Pocket Dictionary</h1>
+        <p class="subtitle">Discover meanings, pronunciations, and synonyms instantly</p>
+        
+        <div class="search-container">
+            <input type="text" class="search-input" id="searchInput" placeholder="Enter a word to define..." autocomplete="off">
+            <button class="search-btn" id="searchBtn" onclick="searchWord()">Search</button>
+        </div>
+
+        <div class="loading" id="loading">
+            Searching for definition...
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+
+        <div class="result-container" id="resultContainer">
+            <div class="word-header">
+                <div class="word-title" id="wordTitle"></div>
+                <div class="pronunciation" id="pronunciation"></div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">📝 Definitions</div>
+                <ul class="meanings-list" id="meaningsList"></ul>
+            </div>
+
+            <div class="section" id="synonymsSection">
+                <div class="section-title">🔗 Synonyms</div>
+                <div class="synonyms-container" id="synonymsContainer"></div>
+            </div>
+        </div>
+
+        <div class="example-searches">
+            <p>Try these examples:</p>
+            <span class="example-word" onclick="searchExampleWord('serendipity')">serendipity</span>
+            <span class="example-word" onclick="searchExampleWord('ephemeral')">ephemeral</span>
+            <span class="example-word" onclick="searchExampleWord('ubiquitous')">ubiquitous</span>
+            <span class="example-word" onclick="searchExampleWord('beautiful')">beautiful</span>
+        </div>
+    </div>
+
+    <script>
+        // API Configuration
+        const API_BASE_URL = 'http://localhost:8080';
+
+        // DOM Elements
+        const searchInput = document.getElementById('searchInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const loading = document.getElementById('loading');
+        const errorMessage = document.getElementById('errorMessage');
+        const resultContainer = document.getElementById('resultContainer');
+        const wordTitle = document.getElementById('wordTitle');
+        const pronunciation = document.getElementById('pronunciation');
+        const meaningsList = document.getElementById('meaningsList');
+        const synonymsContainer = document.getElementById('synonymsContainer');
+        const synonymsSection = document.getElementById('synonymsSection');
+
+        // Event Listeners
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchWord();
+            }
+        });
+
+        searchInput.addEventListener('input', function() {
+            hideError();
+            hideResults();
+        });
+
+        // Focus on search input when page loads
+        window.addEventListener('load', function() {
+            searchInput.focus();
+        });
+
+        // Main search function
+        async function searchWord() {
+            const word = searchInput.value.trim();
+            
+            if (!word) {
+                showError('Please enter a word to search');
+                return;
+            }
+
+            // Show loading state
+            showLoading();
+            hideError();
+            hideResults();
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/define?word=${encodeURIComponent(word)}`);
+                const data = await response.json();
+
+                hideLoading();
+
+                if (data.success) {
+                    displayResults(data);
+                } else {
+                    showError(data.message || 'Word not found');
+                }
+            } catch (error) {
+                hideLoading();
+                console.error('API Error:', error);
+                showError('Unable to connect to dictionary service. Please check if the API is running on http://localhost:8080');
+            }
+        }
+
+        // Search example word
+        function searchExampleWord(word) {
+            searchInput.value = word;
+            searchWord();
+        }
+
+        // Display results
+        function displayResults(data) {
+            // Set word title
+            wordTitle.textContent = data.word;
+
+            // Set pronunciation
+            if (data.pronunciation) {
+                pronunciation.textContent = data.pronunciation;
+                pronunciation.style.display = 'block';
+            } else {
+                pronunciation.style.display = 'none';
+            }
+
+            // Display meanings
+            meaningsList.innerHTML = '';
+            if (data.meanings && data.meanings.length > 0) {
+                data.meanings.forEach(meaning => {
+                    const li = document.createElement('li');
+                    li.className = 'meaning-item';
+                    li.textContent = meaning;
+                    meaningsList.appendChild(li);
+                });
+            } else {
+                const li = document.createElement('li');
+                li.className = 'meaning-item';
+                li.textContent = 'No definitions available';
+                meaningsList.appendChild(li);
+            }
+
+            // Display synonyms
+            if (data.synonyms && data.synonyms.length > 0) {
+                synonymsContainer.innerHTML = '';
+                data.synonyms.forEach(synonym => {
+                    const span = document.createElement('span');
+                    span.className = 'synonym-tag';
+                    span.textContent = synonym;
+                    span.onclick = () => searchExampleWord(synonym);
+                    synonymsContainer.appendChild(span);
+                });
+                synonymsSection.style.display = 'block';
+            } else {
+                synonymsSection.style.display = 'none';
+            }
+
+            // Show results with animation
+            resultContainer.classList.add('show');
+        }
+
+        // UI Helper Functions
+        function showLoading() {
+            loading.classList.add('show');
+            searchBtn.disabled = true;
+            searchBtn.textContent = 'Searching...';
+        }
+
+        function hideLoading() {
+            loading.classList.remove('show');
+            searchBtn.disabled = false;
+            searchBtn.textContent = 'Search';
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.classList.add('show');
+            // Auto-hide error after 5 seconds
+            setTimeout(() => {
+                hideError();
+            }, 5000);
+        }
+
+        function hideError() {
+            errorMessage.classList.remove('show');
+        }
+
+        function hideResults() {
+            resultContainer.classList.remove('show');
+        }
+
+        // Add some visual feedback for better UX
+        searchInput.addEventListener('focus', function() {
+            this.parentElement.style.transform = 'scale(1.02)';
+        });
+
+        searchInput.addEventListener('blur', function() {
+            this.parentElement.style.transform = 'scale(1)';
+        });
+    </script>
+</body>
+</html>
