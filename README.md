@@ -1,4 +1,4 @@
-Pocket Dictionary API
+Pocket Dictionary
 A lightweight, fast, and modern dictionary API service built with Ballerina that provides instant access to word definitions, pronunciations, and synonyms through a beautiful web interface.
 
 Overview
