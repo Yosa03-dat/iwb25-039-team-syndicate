@@ -5,7 +5,7 @@ A lightweight, fast, and modern dictionary API service built with **Ballerina** 
 
 
 ## 🚀 Overview
-Pocket Dictionary API solves the common problem students and language learners face when they need quick access to comprehensive word information.  
+Pocket Dictionary API solves the common problem students and language learners face when they need quick access to comprehensive word information easily.  
 Instead of browsing multiple resources, users get **definitions, pronunciations, and synonyms in one clean, fast interface**.
 
 
