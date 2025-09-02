@@ -17,7 +17,15 @@ Instead of browsing multiple resources, users get **definitions, pronunciations,
 - 📱 **Responsive Design** – Works beautifully on all devices  
 - 🚀 **Lightning Fast** – Optimized API responses under 1 second  
 - 🛡️ **Error Resilient** – Handles invalid words and network issues  
-- 🌐 **CORS Ready** – Built for web frontend integration  
+- 🌐 **CORS Ready** – Built for web frontend integration
+
+## 🧐 Did You Know?
+- The longest word in English has 189,819 letters!  
+- "Serendipity" means finding something good by chance.  
+- The word "quiz" was invented in 1791 as part of a bet.  
+
+*Learn a fun word fact every time you visit this project!*
+
 
 
 
